@@ -11,6 +11,7 @@
         padding: 0;
         text-align: center;
         background: #ffffff;
+        overflow: hidden; /* Prevent scrolling */
       }
 
       #unity-container {
@@ -21,9 +22,9 @@
       }
 
       #unity-canvas {
-        width: 100%;
-        height: auto;
-        max-height: 100vh;
+        width: 100vw;
+        height: 100vh;
+        touch-action: none; /* Prevent unintended gestures */
       }
 
       #loading-overlay {
@@ -49,7 +50,7 @@
         color: white;
         border: none;
         cursor: pointer;
-        display: none; /* Hidden by default, shown only on Windows */
+        display: none; /* Default hidden */
       }
 
       #fullscreen-button:hover {
@@ -63,19 +64,23 @@
       <canvas id="unity-canvas" tabindex="-1"></canvas>
       <button id="fullscreen-button" onclick="toggleFullScreen()">Fullscreen</button>
     </div>
-    
+
     <script src="Build/html.loader.js"></script>
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var fullscreenButton = document.getElementById("fullscreen-button");
 
-      // Check if the user is on Windows (show the fullscreen button)
-      if (navigator.platform.toLowerCase().includes("win")) {
+      function isMobile() {
+        return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      }
+
+      // Show fullscreen button only on Windows
+      if (!isMobile() && navigator.platform.toLowerCase().includes("win")) {
         fullscreenButton.style.display = "block";
       }
 
       function toggleFullScreen() {
-        if (!document.fullscreenElement) {
+        if (!document.fullscreenElement && canvas.requestFullscreen) {
           canvas.requestFullscreen().catch(err => {
             console.log(`Error attempting fullscreen: ${err.message}`);
           });
@@ -83,6 +88,15 @@
           document.exitFullscreen();
         }
       }
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      // Resize canvas for mobile
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
 
       createUnityInstance(canvas, {
         arguments: [],
